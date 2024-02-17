@@ -1,4 +1,3 @@
-import { GameComponent } from './../game/game.component';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
