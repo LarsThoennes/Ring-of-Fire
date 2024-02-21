@@ -4,14 +4,14 @@
 <div class="game-board">
   <div class="card-stack">
     <!-- Card Stack -->
-    <img *ngFor="let c of [0, 1, 2, 3, 5]; let i = index;" [ngStyle]="{'right.px': i * 10}" src="./../../assets/img/card_cover.png">
-    <img (click)="takeCard()" class="top-card" style="right: 50px;" src="./../../assets/img/card_cover.png">
+    <img *ngFor="let c of [0, 1, 2, 3, 5]; let i = index;" [ngStyle]="{'right.px': i * 10}" src="assets/img/card_cover.png">
+    <img (click)="takeCard()" class="top-card" style="right: 50px;" src="assets/img/card_cover.png">
 
     <!-- Stack for played cards -->
-    <img *ngFor="let card of game.playedCards" class="played-card" src="./../../assets/img/{{ card }}.png">
+    <img *ngFor="let card of game.playedCards" class="played-card" src="assets/img/{{ card }}.png">
 
     <!-- Current card (Animation) -->
-    <img (click)="takeCard()" *ngIf="pickCardAnimation" class="pick-card pickCardAnimation" style="right: 50px;" src="./../../assets/img/{{ currentCard }}.png">
+    <img (click)="takeCard()" *ngIf="pickCardAnimation" class="pick-card pickCardAnimation" style="right: 50px;" src="assets/img/{{ currentCard }}.png">
   </div>
 </div>
 

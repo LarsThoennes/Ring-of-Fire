@@ -8,13 +8,14 @@ import { MatDialog } from '@angular/material/dialog'
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { GameInfoComponent } from '../game-info/game-info.component';
 import { MatCardModule } from '@angular/material/card';
+import { FirestoreModule } from '@angular/fire/firestore';
 
 
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [CommonModule, PlayerComponent, MatIconModule, MatButtonModule, GameInfoComponent, MatCardModule],
+  imports: [CommonModule, PlayerComponent, MatIconModule, MatButtonModule, GameInfoComponent, MatCardModule,FirestoreModule ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss'
 })

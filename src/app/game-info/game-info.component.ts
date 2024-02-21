@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnChanges, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
+import { FirestoreModule } from '@angular/fire/firestore';
 
 
 @Component({
   selector: 'app-game-info',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule, MatCardModule,FirestoreModule ],
   templateUrl: './game-info.component.html',
   styleUrl: './game-info.component.scss'
 })
