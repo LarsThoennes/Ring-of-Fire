@@ -5,8 +5,6 @@ import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 
-
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -23,3 +21,4 @@ export class AppComponent {
     this.items$ = collectionData(aCollection);
   }
 }
+1
