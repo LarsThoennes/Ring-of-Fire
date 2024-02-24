@@ -15,10 +15,10 @@ import { Observable } from 'rxjs';
 export class AppComponent {
   firestore: Firestore = inject(Firestore);
   items$: Observable<any[]>;
-  title = 'ringOfFire';
+  title = 'ringoffire';
   constructor() {
     const aCollection = collection(this.firestore, 'items')
     this.items$ = collectionData(aCollection);
   }
 }
-1
+

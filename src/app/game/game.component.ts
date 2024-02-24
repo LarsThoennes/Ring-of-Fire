@@ -8,26 +8,66 @@ import { MatDialog } from '@angular/material/dialog'
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { GameInfoComponent } from '../game-info/game-info.component';
 import { MatCardModule } from '@angular/material/card';
-import { FirestoreModule } from '@angular/fire/firestore';
+import { inject } from '@angular/core';
+import { Firestore, collection, collectionData, doc, getDoc, addDoc, updateDoc, DocumentData } from '@angular/fire/firestore';
+import { Observable, Subscription, EMPTY, from } from 'rxjs';
+import { OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
 
 
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [CommonModule, PlayerComponent, MatIconModule, MatButtonModule, GameInfoComponent, MatCardModule,FirestoreModule ],
+  imports: [CommonModule, PlayerComponent, MatIconModule, MatButtonModule, GameInfoComponent, MatCardModule],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss'
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   pickCardAnimation = false;
   currentCard: string | undefined;
   game!: Game;
+  firestore: Firestore = inject(Firestore);
+  items$: Observable<any> = EMPTY;
+  items: any[] = [];
 
-  constructor(public dialog: MatDialog) { }
+  private itemsSubscription: Subscription | undefined;
 
-    ngOnInit(): void {
-      this.newGame();
+  constructor(private route: ActivatedRoute,public dialog: MatDialog) {
+
+
+  }
+
+  ngOnInit(): void {
+    this.newGame();
+    this.route.params.subscribe((params) => {
+      console.log(params['id']);
+      const gameID = params['id'];
+      this.items$ = collectionData(collection(this.firestore, 'games'));
+      this.itemsSubscription = this.items$.subscribe((list: any[]) => {
+      this.items = list.map((element: any) => element);
+      console.log(this.items);
+    });
+    this.updateGame(this.game);
+    })
+  }
+  async updateGame(item: any) {
+    await updateDoc(doc(this.firestore, 'games', item.id), item);
+  }
+
+  ngOnDestroy(): void {
+    if (this.itemsSubscription) {
+      this.itemsSubscription.unsubscribe();
+    }
+  }
+    async newGame() {
+      this.game = new Game();
+       await addDoc(collection(this.firestore, 'games'),this.game.toJson()).catch(
+         (err) => { console.error() }
+       ).then(
+         (docRef) => {console.log(docRef)}
+       )
     }
 
     takeCard() {
@@ -49,10 +89,6 @@ export class GameComponent implements OnInit {
           }, 1800);
         }
       }
-    }
-
-    newGame() {
-     this.game = new Game();
     }
 
     openDialog(): void {
