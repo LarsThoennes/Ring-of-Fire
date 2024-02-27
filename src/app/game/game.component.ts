@@ -12,7 +12,7 @@ import { inject } from '@angular/core';
 import { Firestore, collection, collectionData, doc, getDoc, addDoc, updateDoc, DocumentData } from '@angular/fire/firestore';
 import { Observable, Subscription, EMPTY, from } from 'rxjs';
 import { OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 
@@ -34,23 +34,27 @@ export class GameComponent implements OnInit, OnDestroy {
 
   private itemsSubscription: Subscription | undefined;
 
-  constructor(private route: ActivatedRoute,public dialog: MatDialog) {
+  constructor(private router: Router,private route: ActivatedRoute,public dialog: MatDialog) {
 
 
   }
 
   ngOnInit(): void {
-    this.newGame();
+    debugger;
+    this.newGame(this.game);
     this.route.params.subscribe((params) => {
-      console.log(params['id']);
+      console.log(params);
       const gameID = params['id'];
+      this.router.navigate(['/games', gameID]);
       this.items$ = collectionData(collection(this.firestore, 'games'));
       this.itemsSubscription = this.items$.subscribe((list: any[]) => {
       this.items = list.map((element: any) => element);
       console.log(this.items);
+      this.game = this.items.find(i => i.id == gameID).data();
+      console.log(this.game);
     });
-    this.updateGame(this.game);
     })
+    this.updateGame(this.game);
   }
   async updateGame(item: any) {
     await updateDoc(doc(this.firestore, 'games', item.id), item);
@@ -61,9 +65,9 @@ export class GameComponent implements OnInit, OnDestroy {
       this.itemsSubscription.unsubscribe();
     }
   }
-    async newGame() {
+    async newGame(gameID: any) {
       this.game = new Game();
-       await addDoc(collection(this.firestore, 'games'),this.game.toJson()).catch(
+       await addDoc(collection(this.firestore, 'games', gameID),this.game.toJson()).catch(
          (err) => { console.error() }
        ).then(
          (docRef) => {console.log(docRef)}
