@@ -12,9 +12,7 @@ import { inject } from '@angular/core';
 import { Firestore, collection, collectionData, doc, getDoc, addDoc, updateDoc, DocumentData } from '@angular/fire/firestore';
 import { Observable, Subscription, EMPTY, from } from 'rxjs';
 import { OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-
-
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -31,31 +29,53 @@ export class GameComponent implements OnInit, OnDestroy {
   firestore: Firestore = inject(Firestore);
   items$: Observable<any> = EMPTY;
   items: any[] = [];
+  gameIdenification: string = '';
+
 
   private itemsSubscription: Subscription | undefined;
 
-  constructor(private router: Router,private route: ActivatedRoute,public dialog: MatDialog) {
+  constructor(private route: ActivatedRoute,public dialog: MatDialog) {  }
 
-
-  }
+  // ngOnInit(): void {
+  //   this.newGame();
+  //   this.route.params.subscribe((params) => {
+  //     this.gameIdenification = params['id'];
+  //     console.log(params);
+  //     const gameID = params['id'];
+  //     this.items$ = collectionData(collection(this.firestore, 'games'));
+  //     this.itemsSubscription = this.items$.subscribe((list: any[]) => {
+  //     this.items = list.map((element: any) => element);
+  //     this.game = this.items.find(i => i.id == gameID).data();
+  //     console.log(this.game);
+  //     console.log(this.items);
+  //     this.updateGame(this.game);
+  //   });
+  //   })
+  // }
 
   ngOnInit(): void {
-    debugger;
-    this.newGame(this.game);
+    this.newGame();
     this.route.params.subscribe((params) => {
-      console.log(params);
+      this.gameIdenification = params['id'];
+      console.log('Game ID from route params:', this.gameIdenification);
       const gameID = params['id'];
-      this.router.navigate(['/games', gameID]);
       this.items$ = collectionData(collection(this.firestore, 'games'));
-      this.itemsSubscription = this.items$.subscribe((list: any[]) => {
-      this.items = list.map((element: any) => element);
-      console.log(this.items);
-      this.game = this.items.find(i => i.id == gameID).data();
-      console.log(this.game);
+      this.items$.subscribe((list: any[]) => {
+        console.log('Items from Firestore:', list);
+        this.items = list.map((element: any) => element);
+        console.log(this.items)
+        const foundGame = this.items.find(i => i.id == gameID);
+        if (foundGame) {
+        console.log('Game found:', foundGame);
+        this.game = foundGame;
+        this.updateGame(this.game);
+        } else {
+        console.log("Spiel nicht gefunden oder Liste ist leer");
+        }
+      });
     });
-    })
-    this.updateGame(this.game);
   }
+
   async updateGame(item: any) {
     await updateDoc(doc(this.firestore, 'games', item.id), item);
   }
@@ -65,13 +85,8 @@ export class GameComponent implements OnInit, OnDestroy {
       this.itemsSubscription.unsubscribe();
     }
   }
-    async newGame(gameID: any) {
+    newGame() {
       this.game = new Game();
-       await addDoc(collection(this.firestore, 'games', gameID),this.game.toJson()).catch(
-         (err) => { console.error() }
-       ).then(
-         (docRef) => {console.log(docRef)}
-       )
     }
 
     takeCard() {
@@ -80,8 +95,7 @@ export class GameComponent implements OnInit, OnDestroy {
         if (card !== undefined) {
           this.currentCard = card;
           this.pickCardAnimation = true;
-          console.log('Game is: ' + this.game.playedCards);
-          console.log('new Card:' + this.currentCard);
+          this.safeGame();
           setTimeout(() => {
             if (this.currentCard !== undefined) {
               this.game.playedCards.push(this.currentCard);
@@ -89,6 +103,7 @@ export class GameComponent implements OnInit, OnDestroy {
               this.pickCardAnimation = false;
               this.game.currentPlayer++;
               this.game.currentPlayer = this.game.currentPlayer % this.game.players.length;
+              this.safeGame();
             }
           }, 1800);
         }
@@ -97,12 +112,21 @@ export class GameComponent implements OnInit, OnDestroy {
 
     openDialog(): void {
       const dialogRef = this.dialog.open(DialogAddPlayerComponent);
-
       dialogRef.afterClosed().subscribe((name: string) => {
         if (name && name.length > 0) {
           this.game.players.push(name);
         }
+        this.safeGame();
       });
     }
+
+    // safeGame() {
+    //   // this.firestore.collection('games').doc(this.gameID).updateDoc(this.game.toJson());
+    //   collection(this.firestore, 'games').doc(this.gameID).updateDoc(this.game.toJson()));
+    // }
+
+    async safeGame() {
+      await updateDoc(doc(this.firestore, 'games', this.gameIdenification), this.game.toJson());
+  }
 
 }

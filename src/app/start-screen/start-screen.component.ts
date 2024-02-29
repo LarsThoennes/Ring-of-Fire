@@ -1,18 +1,23 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { FirestoreModule } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore'; // Firestore statt FirestoreModule
+import { collection, addDoc } from 'firebase/firestore'; // Nur benötigte Firestore-Importe
+import { Game } from '../../models/game';
 
 @Component({
   selector: 'app-start-screen',
-  standalone: true,
-  imports: [FirestoreModule],
   templateUrl: './start-screen.component.html',
-  styleUrl: './start-screen.component.scss'
+  styleUrls: ['./start-screen.component.scss']
 })
 export class StartScreenComponent {
 
-  constructor(private router: Router) {}
-    newGame() {
-      this.router.navigateByUrl('/game');
+  constructor(private firestore: Firestore, private router: Router) {}
+
+  newGame() {
+    let game = new Game();
+    addDoc(collection(this.firestore, 'games'), game.toJson()).then((gameInfo:any) => {
+      this.router.navigateByUrl('/game/' + gameInfo.id);
+    });
   }
 }
+
